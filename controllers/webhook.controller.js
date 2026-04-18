@@ -80,7 +80,7 @@ export async function handleResendWebhook(req, res) {
             headers: email?.headers || {},
         });
 
-        console.table([{
+        console.log([{
             eventType: event.type,
             emailId,
             from: fromAddress,
