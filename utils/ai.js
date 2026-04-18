@@ -2,8 +2,8 @@ import { ollama } from '../clients/ollama.client.js';
 import { OLLAMA_API_KEY, OLLAMA_DEFAULT_MODEL } from '../config/index.js';
 import { ollama_models } from '../config/models.js';
 
-const DEFAULT_MODEL_KEY = 'ollama/gpt-oss-120b';
-const OLLAMA_MODEL_MAP = Object.freeze(ollama_model);
+const DEFAULT_MODEL_KEY = 'ollama/gpt-oss:120b';
+const OLLAMA_MODEL_MAP = Object.freeze(ollama_models);
 
 function resolveModelFromSubject(subject) {
 	if (!subject || typeof subject !== 'string') {

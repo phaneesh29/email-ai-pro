@@ -8,6 +8,7 @@ const EMAIL_FROM = process.env.EMAIL_FROM || "AI <ai@tsindia.org>";
 const OLLAMA_API_KEY = process.env.OLLAMA_API_KEY;
 const OLLAMA_HOST = process.env.OLLAMA_HOST || "https://ollama.com";
 const OLLAMA_DEFAULT_MODEL = process.env.OLLAMA_DEFAULT_MODEL || "gpt-oss:120b";
+const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
 if (!RESEND_API_KEY) {
 	throw new Error("Missing required environment variable: RESEND_API_KEY");
@@ -26,4 +27,5 @@ export {
 	OLLAMA_API_KEY,
 	OLLAMA_HOST,
 	OLLAMA_DEFAULT_MODEL,
+	REDIS_URL,
 };
