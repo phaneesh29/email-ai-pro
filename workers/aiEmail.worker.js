@@ -15,6 +15,20 @@ function extractEmailAddress(value) {
 	return (match ? match[1] : value).trim();
 }
 
+function escapeHtml(value) {
+	return String(value)
+		.replaceAll('&', '&amp;')
+		.replaceAll('<', '&lt;')
+		.replaceAll('>', '&gt;')
+		.replaceAll('"', '&quot;')
+		.replaceAll("'", '&#39;');
+}
+
+function getReplySubject(subject) {
+	const baseSubject = subject && typeof subject === 'string' ? subject.trim() : 'Your request';
+	return baseSubject.toLowerCase().startsWith('re:') ? baseSubject : `Re: ${baseSubject}`;
+}
+
 const workerConnection = new IORedis(REDIS_URL, {
 	maxRetriesPerRequest: null,
 });
@@ -24,42 +38,57 @@ const worker = new Worker(
 	async (job) => {
 		const { emailId, from, subject, prompt } = job.data || {};
 		const replyTo = extractEmailAddress(from);
+		const replySubject = getReplySubject(subject);
 
 		if (!replyTo) {
 			throw new Error('Missing valid sender email in job payload');
 		}
 
-		if (!prompt || typeof prompt !== 'string') {
-			throw new Error('Missing prompt in job payload');
+		try {
+			if (!prompt || typeof prompt !== 'string') {
+				throw new Error('Missing prompt in job payload');
+			}
+
+			const aiResult = await generateAiResponseFromEmail(subject, prompt);
+			const markdownContent = aiResult.content || 'No response generated.';
+			const renderedContent = marked.parse(markdownContent);
+			const responseHtml = typeof renderedContent === 'string' ? renderedContent : await renderedContent;
+			const replyHtml = `${responseHtml}<hr /><p><small>Answered by ${aiResult.model}</small></p>`;
+
+			const mailResult = await sendEmail(replyTo, replySubject, replyHtml);
+
+			console.log('Processing job', {
+				id: job.id,
+				name: job.name,
+				emailId,
+				replyTo,
+				model: aiResult.model,
+			});
+
+			return {
+				processed: true,
+				emailId,
+				replyTo,
+				model: aiResult.model,
+				mailId: mailResult?.id || null,
+				processedAt: new Date().toISOString(),
+			};
+		} catch (error) {
+			const message = error instanceof Error ? error.message : 'Failed to process AI request';
+			const errorHtml = `<p>We could not complete your request.</p><p><strong>Error:</strong> ${escapeHtml(message)}</p>`;
+
+			const errorMailResult = await sendEmail(replyTo, replySubject, errorHtml);
+
+			return {
+				processed: false,
+				errorNotified: true,
+				emailId,
+				replyTo,
+				error: message,
+				mailId: errorMailResult?.id || null,
+				processedAt: new Date().toISOString(),
+			};
 		}
-
-		const aiResult = await generateAiResponseFromEmail(subject, prompt);
-		const markdownContent = aiResult.content || 'No response generated.';
-		const renderedContent = marked.parse(markdownContent);
-		const responseHtml = typeof renderedContent === 'string' ? renderedContent : await renderedContent;
-		const replyHtml = `${responseHtml}<hr /><p><small>Answered by ${aiResult.model}</small></p>`;
-
-		const baseSubject = subject && typeof subject === 'string' ? subject.trim() : 'Your request';
-		const replySubject = baseSubject.toLowerCase().startsWith('re:') ? baseSubject : `Re: ${baseSubject}`;
-
-		const mailResult = await sendEmail(replyTo, replySubject, replyHtml);
-
-		console.log('Processing job', {
-			id: job.id,
-			name: job.name,
-			emailId,
-			replyTo,
-			model: aiResult.model,
-		});
-
-		return {
-			processed: true,
-			emailId,
-			replyTo,
-			model: aiResult.model,
-			mailId: mailResult?.id || null,
-			processedAt: new Date().toISOString(),
-		};
 	},
 	{
 		connection: workerConnection,

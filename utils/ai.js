@@ -1,5 +1,5 @@
 import { ollama } from '../clients/ollama.client.js';
-import { OLLAMA_API_KEY, OLLAMA_DEFAULT_MODEL } from '../config/index.js';
+import { OLLAMA_API_KEY, OLLAMA_DEFAULT_MODEL, OLLAMA_SYSTEM_PROMPT } from '../config/index.js';
 import { ollama_models } from '../config/models.js';
 
 const DEFAULT_MODEL_KEY = 'ollama/gpt-oss:120b';
@@ -32,7 +32,10 @@ export async function generateAiResponseFromEmail(subject, body) {
 	const model = resolveModelFromSubject(subject);
 	const response = await ollama.chat({
 		model,
-		messages: [{ role: 'user', content: body }],
+		messages: [
+			{ role: 'system', content: OLLAMA_SYSTEM_PROMPT },
+			{ role: 'user', content: body },
+		],
 		stream: false,
 	});
 

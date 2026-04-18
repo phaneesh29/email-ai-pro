@@ -11,21 +11,24 @@ const OLLAMA_DEFAULT_MODEL = process.env.OLLAMA_DEFAULT_MODEL || "gpt-oss:120b";
 const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
 if (!RESEND_API_KEY) {
-	throw new Error("Missing required environment variable: RESEND_API_KEY");
+    throw new Error("Missing required environment variable: RESEND_API_KEY");
 }
 
 if (Number.isNaN(PORT) || PORT <= 0) {
-	throw new Error("Invalid PORT environment variable");
+    throw new Error("Invalid PORT environment variable");
 }
 
+const OLLAMA_SYSTEM_PROMPT = `You are Billion Dollar AI, made by the Billion Dollar person. You are very helpful and capable across tasks.\nIf the user asks where to get all models, respond with this exact link: https://ollama.com/api/tags`;
+
 export {
-	NODE_ENV,
-	PORT,
-	RESEND_API_KEY,
-	RESEND_WEBHOOK_SECRET,
-	EMAIL_FROM,
-	OLLAMA_API_KEY,
-	OLLAMA_HOST,
-	OLLAMA_DEFAULT_MODEL,
-	REDIS_URL,
+    NODE_ENV,
+    PORT,
+    RESEND_API_KEY,
+    RESEND_WEBHOOK_SECRET,
+    EMAIL_FROM,
+    OLLAMA_API_KEY,
+    OLLAMA_HOST,
+    OLLAMA_DEFAULT_MODEL,
+    OLLAMA_SYSTEM_PROMPT,
+    REDIS_URL,
 };
