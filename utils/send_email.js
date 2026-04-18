@@ -1,7 +1,5 @@
-import { Resend } from 'resend';
-import { EMAIL_FROM, RESEND_API_KEY } from '../config/index.js';
-
-const resend = new Resend(RESEND_API_KEY);
+import { EMAIL_FROM } from '../config/index.js';
+import { resend } from '../clients/resend.client.js';
 
 export async function sendEmail(to, subject, html) {
 	if (!to || typeof to !== 'string') {
