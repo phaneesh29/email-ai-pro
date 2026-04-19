@@ -1,6 +1,7 @@
 import { ollama } from '../clients/ollama.client.js';
-import { OLLAMA_API_KEY, OLLAMA_DEFAULT_MODEL, OLLAMA_SYSTEM_PROMPT } from '../config/index.js';
+import { OLLAMA_API_KEY, OLLAMA_DEFAULT_MODEL, OLLAMA_SYSTEM_PROMPT, } from '../config/index.js';
 import { ollama_models } from '../config/models.js';
+import { executeAiToolCall, getAiTools } from '../tools/index.js';
 
 const DEFAULT_MODEL_KEY = 'ollama/gpt-oss:120b';
 const OLLAMA_MODEL_MAP = Object.freeze(ollama_models);
@@ -30,14 +31,55 @@ export async function generateAiResponseFromEmail(subject, body) {
 	}
 
 	const model = resolveModelFromSubject(subject);
-	const response = await ollama.chat({
+	const tools = getAiTools();
+	const messages = [
+		{ role: 'system', content: OLLAMA_SYSTEM_PROMPT },
+		{ role: 'user', content: body },
+	];
+
+	let response = await ollama.chat({
 		model,
-		messages: [
-			{ role: 'system', content: OLLAMA_SYSTEM_PROMPT },
-			{ role: 'user', content: body },
-		],
+		messages,
+		...(tools.length ? { tools } : {}),
 		stream: false,
+		think: true,
 	});
+	messages.push(response.message);
+
+	while (true) {
+		const toolCalls = response?.message?.tool_calls || [];
+		if (!Array.isArray(toolCalls) || !toolCalls.length) {
+			break;
+		}
+
+		for (const call of toolCalls) {
+			const toolName = call?.function?.name || 'unknown_tool';
+			try {
+				const toolResult = await executeAiToolCall(call);
+				messages.push({
+					role: 'tool',
+					tool_name: toolName,
+					content: JSON.stringify(toolResult),
+				});
+			} catch (error) {
+				const message = error instanceof Error ? error.message : 'Tool execution failed';
+				messages.push({
+					role: 'tool',
+					tool_name: toolName,
+					content: JSON.stringify({ error: message }),
+				});
+			}
+		}
+
+		response = await ollama.chat({
+			model,
+			messages,
+			...(tools.length ? { tools } : {}),
+			stream: false,
+			think: true,
+		});
+		messages.push(response.message);
+	}
 
 	return {
 		model,
