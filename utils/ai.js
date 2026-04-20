@@ -1,10 +1,19 @@
-import { ollama } from '../clients/ollama.client.js';
-import { OLLAMA_API_KEY, OLLAMA_DEFAULT_MODEL, OLLAMA_SYSTEM_PROMPT, } from '../config/index.js';
+import OpenAI from 'openai';
+import { Agent, run, setDefaultOpenAIClient, setTracingDisabled } from '@openai/agents';
+import { OLLAMA_API_KEY, OLLAMA_DEFAULT_MODEL, OLLAMA_OPENAI_BASE_URL, OLLAMA_SYSTEM_PROMPT, } from '../config/index.js';
 import { ollama_models } from '../config/models.js';
-import { executeAiToolCall, getAiTools } from '../tools/index.js';
+import { getAgentTools } from '../tools/index.js';
 
 const DEFAULT_MODEL_KEY = 'ollama/gpt-oss:120b';
 const OLLAMA_MODEL_MAP = Object.freeze(ollama_models);
+
+const customClient = new OpenAI({
+	baseURL: OLLAMA_OPENAI_BASE_URL,
+	apiKey: OLLAMA_API_KEY || 'ollama',
+});
+
+setDefaultOpenAIClient(customClient);
+setTracingDisabled(true);
 
 function resolveModelFromSubject(subject) {
 	if (!subject || typeof subject !== 'string') {
@@ -22,68 +31,27 @@ function resolveModelFromSubject(subject) {
 }
 
 export async function generateAiResponseFromEmail(subject, body) {
-	if (!OLLAMA_API_KEY) {
-		throw new Error('Missing OLLAMA_API_KEY');
-	}
-
 	if (!body || typeof body !== 'string') {
 		throw new Error('Invalid email body prompt');
 	}
 
 	const model = resolveModelFromSubject(subject);
-	const tools = getAiTools();
-	const messages = [
-		{ role: 'system', content: OLLAMA_SYSTEM_PROMPT },
-		{ role: 'user', content: body },
-	];
-
-	let response = await ollama.chat({
+	const agent = new Agent({
+		name: 'Assistant',
+		instructions: `${OLLAMA_SYSTEM_PROMPT}\nIf the user asks for latest/current/recent information, use tools when needed and cite fetched context clearly.`,
 		model,
-		messages,
-		...(tools.length ? { tools } : {}),
-		stream: false,
-		think: true,
+		tools: getAgentTools(),
 	});
-	messages.push(response.message);
 
-	while (true) {
-		const toolCalls = response?.message?.tool_calls || [];
-		if (!Array.isArray(toolCalls) || !toolCalls.length) {
-			break;
-		}
-
-		for (const call of toolCalls) {
-			const toolName = call?.function?.name || 'unknown_tool';
-			try {
-				const toolResult = await executeAiToolCall(call);
-				messages.push({
-					role: 'tool',
-					tool_name: toolName,
-					content: JSON.stringify(toolResult),
-				});
-			} catch (error) {
-				const message = error instanceof Error ? error.message : 'Tool execution failed';
-				messages.push({
-					role: 'tool',
-					tool_name: toolName,
-					content: JSON.stringify({ error: message }),
-				});
-			}
-		}
-
-		response = await ollama.chat({
-			model,
-			messages,
-			...(tools.length ? { tools } : {}),
-			stream: false,
-			think: true,
-		});
-		messages.push(response.message);
-	}
+	const result = await run(agent, body, { maxTurns: 10 });
+	const finalOutput = result?.finalOutput;
+	const content = typeof finalOutput === 'string'
+		? finalOutput
+		: JSON.stringify(finalOutput ?? {}, null, 2);
 
 	return {
 		model,
-		content: response?.message?.content || '',
-		raw: response,
+		content,
+		raw: result,
 	};
 }

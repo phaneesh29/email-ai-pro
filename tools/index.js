@@ -1,42 +1,32 @@
-import { ollamaWebTools, runOllamaWebTool } from './ollamaWeb.tool.js';
+import { tool } from '@openai/agents';
+import { z } from 'zod';
+import { runWebTool } from './web.tool.js';
 
-function parseToolArguments(rawArguments) {
-	if (!rawArguments) {
-		return {};
-	}
+const webSearch = tool({
+	name: 'web_search',
+	description: 'Search the public web for up-to-date information.',
+	parameters: z.object({
+		query: z.string().min(1),
+		max_results: z.number().int().min(1).max(10).optional(),
+	}),
+	execute: async ({ query, max_results }) => {
+		return runWebTool('web_search', { query, max_results });
+	},
+});
 
-	if (typeof rawArguments === 'string') {
-		try {
-			return JSON.parse(rawArguments);
-		} catch {
-			return {};
-		}
-	}
+const webFetch = tool({
+	name: 'web_fetch',
+	description: 'Fetch and extract content from a public web page URL.',
+	parameters: z.object({
+		url: z.string().url(),
+	}),
+	execute: async ({ url }) => {
+		return runWebTool('web_fetch', { url });
+	},
+});
 
-	if (typeof rawArguments === 'object') {
-		return rawArguments;
-	}
-
-	return {};
+function getAgentTools() {
+	return [webSearch, webFetch];
 }
 
-function getAiTools() {
-	return [...ollamaWebTools];
-}
-
-async function executeAiToolCall(call) {
-	const name = call?.function?.name;
-	if (!name) {
-		throw new Error('Invalid tool call: missing function name');
-	}
-
-	const args = parseToolArguments(call?.function?.arguments);
-
-	if (name === 'web_search' || name === 'web_fetch') {
-		return runOllamaWebTool(name, args);
-	}
-
-	throw new Error(`Unsupported tool call: ${name}`);
-}
-
-export { getAiTools, executeAiToolCall };
+export { getAgentTools };
