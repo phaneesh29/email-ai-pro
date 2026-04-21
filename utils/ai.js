@@ -4,7 +4,7 @@ import { OLLAMA_API_KEY, OLLAMA_DEFAULT_MODEL, OLLAMA_OPENAI_BASE_URL, OLLAMA_SY
 import { ollama_models } from '../config/models.js';
 import { getAgentTools } from '../tools/index.js';
 
-const DEFAULT_MODEL_KEY = 'ollama/gpt-oss:120b';
+const DEFAULT_MODEL_KEY = 'ollama/deepseek-v3.2';
 const OLLAMA_MODEL_MAP = Object.freeze(ollama_models);
 
 const customClient = new OpenAI({

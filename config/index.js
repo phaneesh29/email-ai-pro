@@ -7,7 +7,7 @@ const RESEND_WEBHOOK_SECRET = process.env.RESEND_WEBHOOK_SECRET;
 const EMAIL_FROM = process.env.EMAIL_FROM || "AI <ai@tsindia.org>";
 const OLLAMA_API_KEY = process.env.OLLAMA_API_KEY;
 const OLLAMA_OPENAI_BASE_URL = "https://ollama.com/v1/";
-const OLLAMA_DEFAULT_MODEL = "gpt-oss:120b";
+const OLLAMA_DEFAULT_MODEL = "deepseek-v3.2";
 const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
 if (!RESEND_API_KEY) {
