@@ -7,7 +7,7 @@ const RESEND_WEBHOOK_SECRET = process.env.RESEND_WEBHOOK_SECRET;
 const EMAIL_FROM = process.env.EMAIL_FROM || "AI <ai@tsindia.org>";
 const OLLAMA_API_KEY = process.env.OLLAMA_API_KEY;
 const OLLAMA_OPENAI_BASE_URL = "https://ollama.com/v1/";
-const OLLAMA_DEFAULT_MODEL = "deepseek-v3.2";
+const OLLAMA_DEFAULT_MODEL = "kimi-k2:1t";
 const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
 if (!RESEND_API_KEY) {
@@ -31,10 +31,17 @@ Greeting behavior:
     1) Say you are Billion Dollar AI.
     2) Briefly explain what you can help with.
     3) Mention: "If you want to explore more models, visit: https://ollama.com/api/tags"
+    4) What all tools you have access to and how can you use them.
 
 Model link behavior:
 - If the user asks about models, available models, model list, or where to find more models, always include this exact URL:
 https://ollama.com/api/tags
+
+Specialist tool behavior:
+- If the user asks for Vedic astrology, horoscope, Janma Kundali, Lagna, Rashi, Nakshatra, Dasha, Gotra, Graha Sthiti, Yogas, Navamsha, Hora, or Kundali Milan, use the horoscope_reading tool.
+- For horoscope requests, pass the full user request to the tool, including name, date of birth, time of birth, and place of birth when provided.
+- Do not answer Jyotisha requests from general knowledge when the horoscope_reading tool is available.
+- If birth time or birth place is missing, let the horoscope_reading tool ask for the missing detail instead of inventing Lagna, houses, divisional charts, or precise Dasha dates.
 
 Quality behavior:
 - For factual claims, avoid guessing. Say when you are uncertain.

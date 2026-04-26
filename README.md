@@ -19,6 +19,7 @@ An Express + BullMQ service that receives inbound emails through Resend webhooks
 - Tool-enabled agent responses:
 	- `web_search` for quick public web lookup.
 	- `web_fetch` for extracting web page content.
+	- `horoscope_reading` for Vedic Jyotisha / Janma Kundali requests.
 - Graceful shutdown for both API server and worker process.
 - Health check endpoint for monitoring.
 
@@ -33,6 +34,8 @@ An Express + BullMQ service that receives inbound emails through Resend webhooks
 |-- config/
 |   |-- index.js                # Env/config constants and defaults
 |   `-- models.js               # Ollama model key map
+|-- agents/
+|   `-- horoscope.agent.js      # Dedicated Jyotisha-GPT agent
 |-- controllers/
 |   |-- health.controller.js    # Health endpoint handler
 |   `-- webhook.controller.js   # Resend webhook processing
@@ -43,6 +46,7 @@ An Express + BullMQ service that receives inbound emails through Resend webhooks
 |   `-- webhook.routes.js
 |-- tools/
 |   |-- index.js                # Agent tool definitions
+|   |-- horoscope.tool.js       # Horoscope agent-as-tool wrapper
 |   `-- web.tool.js             # Web search/fetch tool runtime
 |-- utils/
 |   |-- ai.js                   # AI agent + model resolution
@@ -111,7 +115,7 @@ Optional (with defaults):
 Internal constants:
 
 - Ollama-compatible base URL is fixed to `https://ollama.com/v1/`.
-- Default model fallback is `deepseek-v3.2`.
+- Default model fallback is `kimi-k2:1t`.
 
 ## Model Selection Behavior
 
@@ -123,7 +127,7 @@ The worker determines model from the email subject:
 
 Example subject values:
 
-- `ollama/deepseek-v3.2`
+- `ollama/kimi-k2:1t`
 - `ollama/gpt-oss:120b`
 
 ## Scripts

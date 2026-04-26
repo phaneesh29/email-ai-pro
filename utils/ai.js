@@ -4,7 +4,7 @@ import { OLLAMA_API_KEY, OLLAMA_DEFAULT_MODEL, OLLAMA_OPENAI_BASE_URL, OLLAMA_SY
 import { ollama_models } from '../config/models.js';
 import { getAgentTools } from '../tools/index.js';
 
-const DEFAULT_MODEL_KEY = 'ollama/deepseek-v3.2';
+const DEFAULT_MODEL_KEY = 'ollama/kimi-k2:1t';
 const OLLAMA_MODEL_MAP = Object.freeze(ollama_models);
 
 const customClient = new OpenAI({
@@ -38,7 +38,7 @@ export async function generateAiResponseFromEmail(subject, body) {
 	const model = resolveModelFromSubject(subject);
 	const agent = new Agent({
 		name: 'Assistant',
-		instructions: `${OLLAMA_SYSTEM_PROMPT}\nIf the user asks for latest/current/recent information, use tools when needed and cite fetched context clearly.`,
+		instructions: `${OLLAMA_SYSTEM_PROMPT}\nIf the user asks for latest/current/recent information, use tools when needed and cite fetched context clearly.\nIf the user asks for Vedic astrology, horoscope, Janma Kundali, Lagna, Rashi, Nakshatra, Dasha, Gotra, Graha Sthiti, Yogas, Navamsha, Hora, or Kundali Milan, call the horoscope_reading tool and pass the full request.`,
 		model,
 		tools: getAgentTools(),
 	});
