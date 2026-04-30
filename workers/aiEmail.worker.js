@@ -49,7 +49,9 @@ const worker = new Worker(
 				throw new Error('Missing prompt in job payload');
 			}
 
-			const aiResult = await generateAiResponseFromEmail(subject, prompt);
+			const aiResult = await generateAiResponseFromEmail(subject, prompt, {
+				triggeredByEmail: replyTo,
+			});
 			const markdownContent = aiResult.content || 'No response generated.';
 			const renderedContent = marked.parse(markdownContent);
 			const responseHtml = typeof renderedContent === 'string' ? renderedContent : await renderedContent;

@@ -2,6 +2,7 @@ import { tool } from '@openai/agents';
 import { z } from 'zod';
 import { runWebTool } from './web.tool.js';
 import { horoscopeTool } from './horoscope.tool.js';
+import { createMailSenderTool } from './mail_sender.tool.js';
 
 const webSearch = tool({
 	name: 'web_search',
@@ -26,8 +27,8 @@ const webFetch = tool({
 	},
 });
 
-function getAgentTools() {
-	return [webSearch, webFetch, horoscopeTool];
+function getAgentTools(options = {}) {
+	return [webSearch, webFetch, horoscopeTool, createMailSenderTool(options)];
 }
 
 export { getAgentTools };
