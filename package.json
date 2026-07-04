@@ -1,0 +1,36 @@
+{
+  "name": "billion-dollar",
+  "version": "2.0.0",
+  "description": "AI email assistant — Resend webhook + Upstash QStash queue, deployed as 2 Vercel functions",
+  "private": true,
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "dev": "vercel dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phaneesh29/email-ai-pro.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/phaneesh29/email-ai-pro/issues"
+  },
+  "homepage": "https://github.com/phaneesh29/email-ai-pro#readme",
+  "dependencies": {
+    "@ai-sdk/mistral": "^4.0.5",
+    "@tavily/core": "^0.7.6",
+    "@upstash/qstash": "^2.11.1",
+    "ai": "^7.0.14",
+    "marked": "^18.0.5",
+    "resend": "^6.17.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.0",
+    "@vercel/node": "^5.8.22",
+    "typescript": "^6.0.3"
+  }
+}
