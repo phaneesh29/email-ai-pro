@@ -13,26 +13,28 @@ async function handler(req: Request): Promise<Response> {
 	return json(
 		{
 			name: 'Billion Dollar YAAA',
-			description: 'AI assistant that replies to inbound emails, backed by Resend, Upstash QStash, and Mistral.',
+			tagline: 'An intelligent, queue-backed AI email companion powered by Mistral AI.',
+			description: 'A robust, serverless agent designed to automatically process inbound emails, resolve tasks with real-time web access, and reply instantly using Markdown.',
+			model: {
+				name: 'codestral-2508',
+				provider: 'Mistral AI',
+				framework: 'Vercel AI SDK (ToolLoopAgent)'
+			},
+			features: [
+				'Zero-Loss Queueing: Leverages Upstash QStash for reliable message routing and rate-limiting.',
+				'Active Web Intelligence: Employs Tavily to search the live web and extract clean Markdown from references.',
+				'Secure-by-Design: Enforces signature verification for both inbound webhooks and background queue workers.',
+				'Self-Contained Resolution: Crafts comprehensive, single-turn replies formatted in beautiful Markdown, optimized for email clients.'
+			],
 			howItWorks: [
-				'1. Resend receives an inbound email and POSTs an email.received event to /api/webhook.',
-				'2. /api/webhook verifies the Resend signature, checks the recipient, and queues a job via Upstash QStash.',
-				'3. QStash delivers the job to /api/worker (rate-limited to protect the Resend API quota).',
-				'4. /api/worker fetches the full email, generates an AI reply (with optional web_search / web_extract tools), and sends the reply via Resend.',
+				'1. Inbound email triggers a webhook verified via Svix signature.',
+				'2. Webhook handler enqueues the payload to Upstash QStash to guarantee delivery.',
+				'3. QStash dispatches the job to a rate-limited background worker.',
+				'4. Worker executes any required tool calls (web search or site extraction) before compiling the final response.',
+				'5. Assistant sends the response back to the sender using Resend.'
 			],
-			usage: 'This is not a public API — there are no user-facing endpoints to call directly. Just send an email to the configured inbound address and wait for a reply.',
-			endpoints: [
-				{
-					method: 'POST',
-					path: '/api/webhook',
-					description: 'Resend inbound webhook receiver. Requires a valid Svix signature; not intended for manual calls.',
-				},
-				{
-					method: 'POST',
-					path: '/api/worker',
-					description: 'QStash job consumer. Requires a valid Upstash signature; not intended for manual calls.',
-				},
-			],
+			usage: 'This system runs entirely in the background. Send a query to the configured email inbox, and the agent will reply in a single, well-structured email.',
+			status: 'Operational',
 			source: 'https://github.com/phaneesh29/email-ai-pro',
 		},
 		200
