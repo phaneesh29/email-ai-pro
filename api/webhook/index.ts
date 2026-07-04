@@ -11,7 +11,7 @@ function json(body: unknown, status: number): Response {
 	});
 }
 
-export default async function handler(req: Request): Promise<Response> {
+async function handler(req: Request): Promise<Response> {
 	if (req.method !== 'POST') {
 		return json({ ok: false, error: 'Method not allowed' }, 405);
 	}
@@ -81,3 +81,5 @@ export default async function handler(req: Request): Promise<Response> {
 		return json({ ok: false, error: message }, 500);
 	}
 }
+
+export default { fetch: handler };
