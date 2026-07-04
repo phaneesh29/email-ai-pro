@@ -1,15 +1,6 @@
-import { EMAIL_FROM, RESEND_WEBHOOK_SECRET } from '../config/index.js';
+import { EMAIL_FROM, RESEND_WEBHOOK_SECRET, extractEmailAddress } from '../config/index.js';
 import { resend } from '../clients/resend.client.js';
 import { enqueueAiEmailJob } from '../queues/aiEmail.queue.js';
-
-function extractEmailAddress(value) {
-    if (!value || typeof value !== 'string') {
-        return '';
-    }
-
-    const match = value.match(/<([^>]+)>/);
-    return (match ? match[1] : value).trim();
-}
 
 export async function handleResendWebhook(req, res) {
     if (!RESEND_WEBHOOK_SECRET) {

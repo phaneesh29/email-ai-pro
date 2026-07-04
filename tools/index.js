@@ -6,7 +6,7 @@ import { createMailSenderTool } from './mail_sender.tool.js';
 
 const webSearch = tool({
 	name: 'web_search',
-	description: 'Search the public web for up-to-date information.',
+	description: 'Search the web for current information, news, or facts. MUST use for any time-sensitive query.',
 	parameters: z.object({
 		query: z.string().min(1),
 		max_results: z.number().int().min(1).max(10).optional(),
@@ -18,7 +18,7 @@ const webSearch = tool({
 
 const webFetch = tool({
 	name: 'web_fetch',
-	description: 'Fetch and extract content from a public web page URL.',
+	description: 'Fetch and extract text content from a URL.',
 	parameters: z.object({
 		url: z.string().url(),
 	}),

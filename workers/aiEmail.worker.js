@@ -1,19 +1,10 @@
 import IORedis from 'ioredis';
 import { Worker } from 'bullmq';
 import { marked } from 'marked';
-import { REDIS_URL } from '../config/index.js';
+import { REDIS_URL, extractEmailAddress } from '../config/index.js';
 import { aiEmailQueueName } from '../queues/aiEmail.queue.js';
 import { generateAiResponseFromEmail } from '../utils/ai.js';
 import { sendEmail } from '../utils/send_email.js';
-
-function extractEmailAddress(value) {
-	if (!value || typeof value !== 'string') {
-		return '';
-	}
-
-	const match = value.match(/<([^>]+)>/);
-	return (match ? match[1] : value).trim();
-}
 
 function escapeHtml(value) {
 	return String(value)

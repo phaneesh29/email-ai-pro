@@ -39,7 +39,7 @@ export async function generateAiResponseFromEmail(subject, body, options = {}) {
 	const triggeredByEmail = typeof options.triggeredByEmail === 'string' ? options.triggeredByEmail.trim() : '';
 	const agent = new Agent({
 		name: 'Assistant',
-		instructions: `${OLLAMA_SYSTEM_PROMPT}\nIf the user asks for latest/current/recent information, use tools when needed and cite fetched context clearly.\nIf the user asks for Vedic astrology, horoscope, Janma Kundali, Lagna, Rashi, Nakshatra, Dasha, Gotra, Graha Sthiti, Yogas, Navamsha, Hora, or Kundali Milan, call the horoscope_reading tool and pass the full request.\nThis system is triggered by inbound email prompts.${triggeredByEmail ? ` The current prompt sender email is: ${triggeredByEmail}.` : ''}\nWhen using mail_sender, remember that the outgoing email will automatically include the triggering sender email at the end for traceability.`,
+		instructions: `${OLLAMA_SYSTEM_PROMPT}\nTriggered by inbound email.${triggeredByEmail ? ` Sender: ${triggeredByEmail}.` : ''} mail_sender auto-appends sender email for traceability.`,
 		model,
 		tools: getAgentTools({ triggeredByEmail }),
 	});
